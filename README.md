@@ -3,7 +3,7 @@
 [![CI](https://github.com/skeptre/retail-ops-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/skeptre/retail-ops-platform/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/Python-3.11+-blue)](https://python.org)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue)](https://postgresql.org)
-[![Prefect](https://img.shields.io/badge/Prefect-2.x-blue)](https://prefect.io)
+[![Prefect](https://img.shields.io/badge/Prefect-3.x-blue)](https://prefect.io)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.109-green)](https://fastapi.tiangolo.com)
 [![Tests](https://img.shields.io/badge/Tests-20%20passing-brightgreen)](https://github.com/skeptre/retail-ops-platform)
 
@@ -15,35 +15,85 @@ quality validation, orchestration, and analytics serving.
 
 ## Architecture
 
-```text
-Raw CSVs
-   │
-   ▼
-┌─────────────────────────────────────────────────┐
-│  BRONZE (raw)                                   │
-│  raw_transactions / raw_inventory / raw_stores  │
-│  pipeline_runs                                  │
-└─────────────────────────────────────────────────┘
-   │  SQL transformations (DISTINCT ON, type casts)
-   ▼
-┌─────────────────────────────────────────────────┐
-│  SILVER (clean, typed)                          │
-│  transactions / inventory / stores              │
-└─────────────────────────────────────────────────┘
-   │  SQL aggregations
-   ▼
-┌─────────────────────────────────────────────────┐
-│  GOLD (analytics-ready)                         │
-│  daily_store_sales / inventory_health           │
-└─────────────────────────────────────────────────┘
-   │
-   ▼
-FastAPI  ──►  /health
-             /api/v1/sales/daily
-             /api/v1/sales/summary
-             /api/v1/inventory/alerts
-             /api/v1/inventory/health-snapshot
-             /api/v1/pipeline/runs
+```mermaid
+flowchart TD
+    CSV1[/"POS Transactions CSV"/]
+    CSV2[/"Inventory CSV"/]
+    CSV3[/"Stores CSV"/]
+
+    subgraph INGEST["Ingestion Layer (Python + BaseLoader)"]
+        L1[Transaction Loader]
+        L2[Inventory Loader]
+        L3[Store Loader]
+    end
+
+    subgraph BRONZE["Bronze Schema (PostgreSQL)"]
+        B1[(raw_transactions)]
+        B2[(raw_inventory)]
+        B3[(raw_stores)]
+        B4[(pipeline_runs)]
+        BQ[(quarantine)]
+    end
+
+    subgraph SILVER["Silver Schema (PostgreSQL)"]
+        S1[(transactions)]
+        S2[(inventory)]
+        S3[(stores)]
+    end
+
+    subgraph GOLD["Gold Schema (PostgreSQL)"]
+        G1[(daily_store_sales)]
+        G2[(inventory_health)]
+    end
+
+    subgraph VALIDATE["Validation Layer"]
+        V1{Quality Checks}
+    end
+
+    subgraph API["FastAPI"]
+        A1[/GET /health/]
+        A2[/GET /sales/daily/]
+        A3[/GET /sales/summary/]
+        A4[/GET /inventory/alerts/]
+        A5[/GET /pipeline/runs/]
+    end
+
+    PREFECT["Prefect Orchestrator"]
+
+    CSV1 --> L1
+    CSV2 --> L2
+    CSV3 --> L3
+
+    L1 -->|retry + quarantine| B1
+    L2 -->|retry + quarantine| B2
+    L3 -->|retry + quarantine| B3
+    L1 -->|failed batches| BQ
+
+    B1 -->|DISTINCT ON + type cast| S1
+    B2 -->|DISTINCT ON + type cast| S2
+    B3 -->|upsert| S3
+
+    S1 -->|GROUP BY date + store| G1
+    S2 -->|reorder rate| G2
+
+    G1 --> V1
+    G2 --> V1
+    S1 --> V1
+
+    V1 -->|pass| B4
+    V1 -->|fail abort| B4
+
+    G1 --> A2
+    G1 --> A3
+    G2 --> A4
+    B4 --> A1
+    B4 --> A5
+
+    PREFECT -->|orchestrates| INGEST
+    PREFECT -->|orchestrates| SILVER
+    PREFECT -->|orchestrates| GOLD
+    PREFECT -->|orchestrates| VALIDATE
+```
 ```
 
 **Orchestration:** Prefect flow chains all stages with retries and run metadata logging.
@@ -258,7 +308,7 @@ component would evolve at production scale:
 | --- | --- |
 | Language | Python 3.11 |
 | Database | PostgreSQL 16 |
-| Orchestration | Prefect 2.x |
+| Orchestration | Prefect 3.x |
 | API | FastAPI + Uvicorn |
 | Data processing | Pandas, SQLAlchemy |
 | Testing | Pytest |
