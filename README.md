@@ -17,17 +17,17 @@ quality validation, orchestration, and analytics serving.
 
 ```mermaid
 flowchart TD
-    CSV1[/"POS Transactions CSV"/]
-    CSV2[/"Inventory CSV"/]
-    CSV3[/"Stores CSV"/]
+    CSV1[/"POS Transactions CSV"//]
+    CSV2[/"Inventory CSV"//]
+    CSV3[/"Stores CSV"//]
 
-    subgraph INGEST["Ingestion Layer (Python + BaseLoader)"]
+    subgraph INGEST ["INGEST s1"]
         L1[Transaction Loader]
         L2[Inventory Loader]
         L3[Store Loader]
     end
 
-    subgraph BRONZE["Bronze Schema (PostgreSQL)"]
+    subgraph BRONZE ["BRONZE s2"]
         B1[(raw_transactions)]
         B2[(raw_inventory)]
         B3[(raw_stores)]
@@ -35,27 +35,27 @@ flowchart TD
         BQ[(quarantine)]
     end
 
-    subgraph SILVER["Silver Schema (PostgreSQL)"]
+    subgraph SILVER ["SILVER s3"]
         S1[(transactions)]
         S2[(inventory)]
         S3[(stores)]
     end
 
-    subgraph GOLD["Gold Schema (PostgreSQL)"]
+    subgraph GOLD ["GOLD s4"]
         G1[(daily_store_sales)]
         G2[(inventory_health)]
     end
 
-    subgraph VALIDATE["Validation Layer"]
-        V1{Quality Checks}
+    subgraph VALIDATE ["VALIDATE s5"]
+        V1[s29]
     end
 
-    subgraph API["FastAPI"]
-        A1[/GET /health/]
-        A2[/GET /sales/daily/]
-        A3[/GET /sales/summary/]
-        A4[/GET /inventory/alerts/]
-        A5[/GET /pipeline/runs/]
+    subgraph API ["API s6"]
+        A1[/GET /health//]
+        A2[/GET /sales/daily//]
+        A3[/GET /sales/summary//]
+        A4[/GET /inventory/alerts//]
+        A5[/GET /pipeline/runs//]
     end
 
     PREFECT["Prefect Orchestrator"]
@@ -93,6 +93,33 @@ flowchart TD
     PREFECT -->|orchestrates| SILVER
     PREFECT -->|orchestrates| GOLD
     PREFECT -->|orchestrates| VALIDATE
+
+    classDef csv fill:#f8fafc,stroke:#64748b,stroke-width:1.5px,color:#0f172a
+    classDef ingest fill:#dbeafe,stroke:#2563eb,stroke-width:2px,color:#1e3a8a
+    classDef bronze fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#78350f
+    classDef silver fill:#e0f2fe,stroke:#0284c7,stroke-width:2px,color:#0c4a6e
+    classDef gold fill:#dcfce7,stroke:#16a34a,stroke-width:2px,color:#14532d
+    classDef validate fill:#f3e8ff,stroke:#9333ea,stroke-width:2px,color:#581c87
+    classDef api fill:#ede9fe,stroke:#7c3aed,stroke-width:2px,color:#3b0764
+    classDef orchestrator fill:#111827,stroke:#6366f1,stroke-width:2px,color:#ffffff
+    classDef danger fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#7f1d1d
+
+    class CSV1,CSV2,CSV3 csv
+    class L1,L2,L3 ingest
+    class B1,B2,B3,B4 bronze
+    class BQ danger
+    class S1,S2,S3 silver
+    class G1,G2 gold
+    class V1 validate
+    class A1,A2,A3,A4,A5 api
+    class PREFECT orchestrator
+
+    style INGEST fill:#eff6ff,stroke:#60a5fa,stroke-width:1px,color:#1e3a8a
+    style BRONZE fill:#fffbeb,stroke:#f59e0b,stroke-width:1px,color:#78350f
+    style SILVER fill:#f0f9ff,stroke:#38bdf8,stroke-width:1px,color:#0c4a6e
+    style GOLD fill:#f0fdf4,stroke:#4ade80,stroke-width:1px,color:#14532d
+    style VALIDATE fill:#faf5ff,stroke:#c084fc,stroke-width:1px,color:#581c87
+    style API fill:#f5f3ff,stroke:#a78bfa,stroke-width:1px,color:#3b0764
 ```
 ```
 
