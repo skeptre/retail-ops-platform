@@ -121,7 +121,6 @@ flowchart TD
     style VALIDATE fill:#faf5ff,stroke:#c084fc,stroke-width:1px,color:#581c87
     style API fill:#f5f3ff,stroke:#a78bfa,stroke-width:1px,color:#3b0764
 ```
-```
 
 **Orchestration:** Prefect flow chains all stages with retries and run metadata logging.
 **Validation:** Quality checks run after transformation — error-severity failures abort the pipeline.
