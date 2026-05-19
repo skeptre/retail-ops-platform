@@ -38,8 +38,9 @@ env/
 # ========================
 # Project Runtime Output
 # ========================
-data/quarantine/*.csv
-data/raw/
+data/raw/**/*.csv
+data/raw/**/*.json
+data/raw/**/*.parquet
 
 # ========================
 # Pytest & Coverage
