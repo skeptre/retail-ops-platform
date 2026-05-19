@@ -1,6 +1,5 @@
 import pandas as pd
 from pathlib import Path
-from datetime import date
 
 STORES = [
     (1, 'Manchester Flagship', 'Manchester', 'North West', 'flagship'),

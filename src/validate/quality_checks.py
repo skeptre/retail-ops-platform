@@ -78,6 +78,6 @@ def run_checks(engine) -> None:
                 failures.append(msg)
 
     if failures:
-        raise ValueError(f'Quality checks failed:\n' + '\n'.join(failures))
+        raise ValueError('Quality checks failed:\n' + '\n'.join(failures))
 
     logger.info('All quality checks passed')
