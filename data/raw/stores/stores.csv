@@ -1,0 +1,11 @@
+store_id,store_name,city,region,store_type,opened_date
+1,Manchester Flagship,Manchester,North West,flagship,2018-01-01
+2,London Central,London,London,flagship,2018-06-30
+3,Edinburgh Warehouse,Edinburgh,Scotland,warehouse,2018-12-27
+4,Birmingham Outlet,Birmingham,Midlands,outlet,2019-06-25
+5,Bristol Flagship,Bristol,South West,flagship,2019-12-22
+6,Leeds Warehouse,Leeds,Yorkshire,warehouse,2020-06-19
+7,Cardiff Outlet,Cardiff,Wales,outlet,2020-12-16
+8,Liverpool Flagship,Liverpool,North West,flagship,2021-06-14
+9,Glasgow Warehouse,Glasgow,Scotland,warehouse,2021-12-11
+10,Newcastle Outlet,Newcastle,North East,outlet,2022-06-09
