@@ -132,9 +132,9 @@ flowchart TD
 
 **Prerequisites:** Docker Desktop, Python 3.11+, Git
 
-```bash
+```powershell
 # 1. Clone
-git clone https://github.com/skeptre/retail-ops-platform
+git clone https://github.com/skeptre/retail-ops-platform.git
 cd retail-ops-platform
 
 # 2. Create virtual environment
@@ -148,22 +148,16 @@ pip install -r requirements.txt
 # 4. Configure environment
 copy .env.example .env        # Windows
 cp .env.example .env          # Mac/Linux
-# Edit .env with your values
+# Default values work with the Docker Compose setup as-is
 
-# 5. Start infrastructure
-cd docker && docker compose up -d && cd ..
+# 5. Run bootstrap script (starts Docker, clears data, generates data, runs pipeline)
+.\scripts\seed_and_run.ps1    # Windows
 
-# 6. Generate mock data
-python -m src.generate.stores
-python -m src.generate.inventory
-python -m src.generate.transactions
-
-# 7. Run the pipeline
-python -m src.orchestrate.pipeline_flow
-
-# 8. Start the API
+# 6. Start the API (in a new terminal with venv activated)
 uvicorn src.api.main:app --reload
-# Open: http://localhost:8000/docs
+
+# 7. Open interactive docs
+# http://localhost:8000/docs
 ```
 
 ---
