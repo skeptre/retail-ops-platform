@@ -4,7 +4,7 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue)](https://postgresql.org)
 [![Prefect](https://img.shields.io/badge/Prefect-2.x-blue)](https://prefect.io)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.109-green)](https://fastapi.tiangolo.com)
-[![Tests](https://img.shields.io/badge/Tests-20%20passing-brightgreen)]()
+[![Tests](https://img.shields.io/badge/Tests-20%20passing-brightgreen)](https://github.com/skeptre/retail-ops-platform)
 
 A production-patterned ELT data platform for a multi-location retail business.
 Demonstrates the full data engineering lifecycle: ingestion, transformation,
@@ -14,7 +14,7 @@ quality validation, orchestration, and analytics serving.
 
 ## Architecture
 
-```
+```text
 Raw CSVs
    │
    ▼
@@ -94,6 +94,7 @@ uvicorn src.api.main:app --reload
 ## Design Decisions
 
 ### ELT over ETL
+
 Data is loaded into PostgreSQL in raw TEXT format first (bronze layer), then
 transformed in-database using SQL. This means raw data is always preserved and
 transformations are replayable without re-ingesting. If transformation logic
@@ -101,6 +102,7 @@ changes, you re-run the SQL against the same bronze data. ETL would transform
 before loading — simpler, but you lose the audit trail.
 
 ### Why PostgreSQL over a Data Warehouse
+
 For a portfolio MVP, PostgreSQL demonstrates the same SQL patterns used in
 BigQuery, Redshift, and Snowflake at no cost. The medallion schema, upsert
 patterns, and quality checks transfer directly to any cloud warehouse. At scale,
@@ -108,34 +110,40 @@ the upgrade path is: partition bronze tables by date, move raw files to S3/GCS,
 replace PostgreSQL with a columnar warehouse, and add dbt for transformations.
 
 ### Medallion Architecture (Bronze / Silver / Gold)
+
 - **Bronze** — raw, append-only, all columns TEXT. Load never fails due to type mismatch.
 - **Silver** — typed, validated, deduplicated. One clean record per business entity.
 - **Gold** — pre-aggregated for fast API queries. Rebuilt on each pipeline run.
 
 ### Idempotency
+
 Every transformation uses `ON CONFLICT DO NOTHING` or `ON CONFLICT DO UPDATE`.
 Re-running the pipeline any number of times produces the same result without
 duplicating data. This is non-negotiable for scheduled batch pipelines.
 
 ### Quarantine Pattern
+
 Records that fail silver transformation checks are flagged with
 `_is_quarantined = TRUE` and a reason in `bronze.raw_transactions`. Nothing is
 silently dropped. Failed records are recoverable — if transformation logic is
 fixed, you can re-process quarantined rows without re-ingesting from source.
 
 ### Retry Logic
+
 The `BaseLoader` class retries failed loads up to 3 times with exponential
 backoff (1s, 2s, 4s). This handles transient database connectivity issues
 without crashing the pipeline. After all retries fail, the batch is written
 to `data/quarantine/` as a CSV for manual inspection.
 
 ### Pipeline Run Metadata
+
 Every pipeline run writes a record to `bronze.pipeline_runs` with start time,
 finish time, status, and any error message. This makes the platform observable
 — you can see the full run history via the `/api/v1/pipeline/runs` endpoint
 without digging through logs.
 
 ### Gold Layer Caching
+
 Gold tables are materialised tables, not views. The API queries gold directly
 so responses are fast even with millions of rows in silver. A view would
 re-aggregate on every API request.
@@ -145,7 +153,7 @@ re-aggregate on every API request.
 ## Trade-offs and Known Limitations
 
 | Limitation | Impact | Upgrade Path |
-|---|---|---|
+| --- | --- | --- |
 | Batch (daily) not streaming | Data is up to 24h stale | Add Kafka/Kinesis for real-time ingestion |
 | Full refresh on gold | Slow at very large scale | Incremental refresh with watermark column |
 | Batch-level quarantine | All rows in a failed batch quarantined together | Row-level quarantine with pre-validation |
@@ -158,7 +166,7 @@ re-aggregate on every API request.
 ## Data Quality Checks
 
 | Check | Type | Threshold |
-|---|---|---|
+| --- | --- | --- |
 | No negative quantities in silver | Error | 0 |
 | No future-dated transactions | Error | 0 |
 | Quarantine rate under 10% | Error | <10% |
@@ -174,7 +182,7 @@ Warning-severity failures log but allow the run to complete.
 ## API Reference
 
 | Method | Endpoint | Description |
-|---|---|---|
+| --- | --- | --- |
 | GET | `/health` | Platform health and last pipeline run status |
 | GET | `/api/v1/sales/daily` | Daily sales by store with optional filters |
 | GET | `/api/v1/sales/summary` | Revenue summary for 7d, 30d, or 90d period |
@@ -188,7 +196,7 @@ Interactive docs: `http://localhost:8000/docs`
 
 ## Project Structure
 
-```
+```text
 retail-ops-platform/
 ├── docker/                  # Docker Compose and PostgreSQL init
 ├── src/
@@ -246,7 +254,7 @@ component would evolve at production scale:
 ## Stack
 
 | Component | Technology |
-|---|---|
+| --- | --- |
 | Language | Python 3.11 |
 | Database | PostgreSQL 16 |
 | Orchestration | Prefect 2.x |
