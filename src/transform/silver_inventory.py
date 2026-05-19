@@ -9,7 +9,7 @@ INSERT INTO silver.inventory (
     reorder_point, is_below_reorder,
     last_restocked, supplier_id
 )
-SELECT
+SELECT DISTINCT ON (store_id::INT, product_id::INT)
     store_id::INT,
     product_id::INT,
     stock_level::INT,
@@ -22,6 +22,7 @@ WHERE store_id IS NOT NULL
   AND product_id IS NOT NULL
   AND stock_level ~ '^[0-9]+$'
   AND reorder_point ~ '^[0-9]+$'
+ORDER BY store_id::INT, product_id::INT, _ingested_at DESC
 ON CONFLICT (store_id, product_id) DO UPDATE
     SET stock_level      = EXCLUDED.stock_level,
         reorder_point    = EXCLUDED.reorder_point,

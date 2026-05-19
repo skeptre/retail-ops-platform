@@ -7,7 +7,7 @@ SQL = """
 INSERT INTO silver.stores (
     store_id, store_name, city, region, store_type, opened_date
 )
-SELECT
+SELECT DISTINCT ON (store_id::INT)
     store_id::INT,
     store_name,
     city,
@@ -17,6 +17,7 @@ SELECT
 FROM bronze.raw_stores
 WHERE store_id IS NOT NULL
   AND store_name IS NOT NULL
+ORDER BY store_id::INT, _ingested_at DESC
 ON CONFLICT (store_id) DO UPDATE
     SET store_name      = EXCLUDED.store_name,
         city            = EXCLUDED.city,
