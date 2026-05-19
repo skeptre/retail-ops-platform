@@ -1,5 +1,6 @@
 # Retail & Operations Intelligence Platform
 
+[![CI](https://github.com/skeptre/retail-ops-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/skeptre/retail-ops-platform/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/Python-3.11+-blue)](https://python.org)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue)](https://postgresql.org)
 [![Prefect](https://img.shields.io/badge/Prefect-2.x-blue)](https://prefect.io)
