@@ -1,7 +1,7 @@
 pandas==2.2.0
 psycopg2-binary==2.9.10
 sqlalchemy==2.0.27
-fastapi==0.109.2
+fastapi>=0.111.0
 uvicorn==0.27.1
 prefect==3.7.1
 faker==23.1.0
