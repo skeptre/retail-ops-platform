@@ -1,6 +1,6 @@
 # Retail & Operations Intelligence Platform
 
-[![Python](https://img.shields.io/badge/Python-3.11+-blue)](https://python.org)
+[![Python](https://img.shields.io/badge/Python-3.11+-blue)](https://python.org)  # noqa: E999
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue)](https://postgresql.org)
 [![Prefect](https://img.shields.io/badge/Prefect-2.x-blue)](https://prefect.io)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.109-green)](https://fastapi.tiangolo.com)
